@@ -53,6 +53,13 @@ a.article-title:hover {
   margin-right: 16px;
 }
 
+.article-metadata .article-star{
+  height: 20px;
+  width: auto;
+  margin-right: 16px;
+  margin-bottom: 5px;
+}
+
 .article-metadata {
   padding-bottom: 1px;
   margin-bottom: 4px;
@@ -85,4 +92,42 @@ a.article-title:hover {
   font-size: 15px;
   color: black;
   text-align: right;
+}
+
+.stars input{
+  display: none;
+}
+
+.stars input:checked ~ label{
+  color: gold;
+  text-shadow: 1px 1px #c60;
+}
+
+.stars:not(:checked) > label:hover,
+.stars:not(:checked) > label:hover ~ label{
+  color: gold; 
+}
+
+.stars input:checked > label:hover,
+.stars input:checked > label:hover ~ label{
+  color: gold; 
+  text-shadow: 1px 1px goldenrod;
+}
+
+.stars{
+  text-align: right;
+  transform: scaleX(-1);
+  
+}
+
+.stars label{
+  
+  font-size: 30px;
+  color: lightgrey;
+  margin: 0 2px;
+  text-shadow: 1px 1px #bbb;
+}
+
+.stars label:before{
+  content: '★';
 }

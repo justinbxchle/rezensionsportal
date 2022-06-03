@@ -1,9 +1,7 @@
-
-from pydoc import render_doc
 from unicodedata import category
 from flask import Blueprint, render_template, flash, redirect, url_for, request, abort
 from flask_login import login_required, current_user
-from website.forms import AccountUpdateForm, PostForm, CommentForm, FilterPostForm, SearchForm
+from website.forms import AccountUpdateForm, PostForm, CommentForm, FilterPostForm, SearchForm, DeleteForm
 from website import db, app
 from .models import Post, User, Category, Comment
 import secrets
@@ -47,7 +45,7 @@ def add():
     form.category.choices = categories
     if form.validate_on_submit():
         category = Category.query.filter_by(term=form.category.data).first()
-        post = Post(title=form.title.data, content=form.content.data, overname=category, post_author=current_user)
+        post = Post(title=form.title.data, content=form.content.data, overname=category, post_author=current_user, star=form.star.data)
         db.session.add(post)
         db.session.commit()
         flash('Post has been created!', 'success')
@@ -114,12 +112,33 @@ def update_post(post_id):
         form.content.data = post.content
     return render_template("add_post.html", form=form, legend='Update Post')
 
-
-@views.route('/history')
+@views.route('/post/<int:post_id>/delete', methods=['GET','POST'])
 @login_required
-def history():
-    posts = Post.query.all()
-    return render_template("history.html", posts=posts)
+def delete_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    if post.post_author != current_user:
+        abort(403)
+    form = DeleteForm()
+    if form.validate_on_submit():
+        db.session.delete(post)
+        db.session.commit()
+        flash('Post has been deleted!', 'success')
+        return redirect(url_for('views.accounts', username=current_user.username))
+    return render_template('delete.html', post=post, form=form)
+
+@views.route('/comment/<int:comment_id>/delete', methods=['GET','POST'])
+@login_required
+def delete_comment(comment_id):
+    comment = Comment.query.get_or_404(comment_id)
+    if comment.comment_author != current_user:
+        abort(403)
+    form = DeleteForm()
+    if form.validate_on_submit():
+        db.session.delete(comment)
+        db.session.commit()
+        flash('Comment has been deleted!', 'success')
+        return redirect(url_for('views.post', post_id=comment.post_id))
+    return render_template('delete.html', post=comment.post, form=form)
 
 
 def save_picture(form_picture):
@@ -128,7 +147,7 @@ def save_picture(form_picture):
     picture_filename = random_hex + f_ext
     picture_path = os.path.join(app.root_path, 'static/profile_pictures', picture_filename)
     #Resizing the image
-    output_size = (300, 500)
+    output_size = (300, 300)
     i = Image.open(form_picture)
     i.thumbnail(output_size)
     i.save(picture_path)
