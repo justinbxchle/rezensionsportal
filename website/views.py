@@ -1,4 +1,3 @@
-from unicodedata import category
 from flask import Blueprint, render_template, flash, redirect, url_for, request, abort
 from flask_login import login_required, current_user
 from website.forms import AccountUpdateForm, PostForm, CommentForm, FilterPostForm, SearchForm, DeleteForm
